@@ -2,6 +2,7 @@
 """exercise module"""
 import redis
 import uuid
+from typing import Union
 
 
 class Cache:
@@ -10,10 +11,9 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
-    def store(self, data) -> str:
+    def store(self, data: Union[str, bytes, int, float]) -> str:
         """takes data arg, generates random key,
         store data in redis with random key"""
         randkey = str(uuid.uuid4())
-        if isinstance(data, (str, bytes, int, float)):
-            self._redis.set(randkey, data)
-            return randkey
+        self._redis.set(randkey, data)
+        return randkey
