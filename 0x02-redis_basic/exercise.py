@@ -27,9 +27,9 @@ def call_history(method: Callable) -> Callable:
     def wrapper(self, *args, **kwds):
         """wrapped function"""
         self._redis.rpush(inputs, str(args))
-        data = method(self, *args, **kwds)
-        self._redis.rpush(outputs, str(data))
-        return data
+        output = method(self, *args, **kwds)
+        self._redis.rpush(outputs, str(output))
+        return output
     return wrapper
 
 
