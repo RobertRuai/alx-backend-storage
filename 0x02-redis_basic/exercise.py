@@ -2,7 +2,19 @@
 """exercise module"""
 import redis
 import uuid
-from typing import Union
+from typing import Union, Callable, Optional
+from functools import wraps
+
+
+def count_calls(method: Callable) -> Callable:
+    """returns a Callable"""
+    key = method.__qualname__
+
+    @wraps(method)
+    def wrapper(self, *args, **kwds):
+        self._redis.incr(key)
+        return method(self, *args, **kwds)
+    return wrapper
 
 
 class Cache:
@@ -11,6 +23,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """takes data arg, generates random key,
         store data in redis with random key"""
@@ -22,7 +35,7 @@ class Cache:
             self, key: str,
             fn: Optional[Callable] = None) -> Union[str, bytes, int, float]:
         """convert the data back to desired format"""
-        res = self.get(key)
+        res = self._redis.get(key)
         if (fn):
             return fn(res)
         return res
